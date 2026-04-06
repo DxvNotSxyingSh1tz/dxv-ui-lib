@@ -674,6 +674,85 @@ function Library:Init(options)
 			return Toggle
 		end
 		
+		function Tab:Label(options)
+			options = Library:validate({
+				Text = "Preview Text",
+			}, options or {})
+
+			local Label = {
+				Hover = false,
+				MouseDown = false
+			}
+			
+			-- Render
+			do
+				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Label
+				Label["22"] = Instance.new("Frame", Tab["1a"]);
+				Label["22"]["BorderSizePixel"] = 0;
+				Label["22"]["BackgroundColor3"] = Color3.fromRGB(0, 8, 23);
+				Label["22"]["Size"] = UDim2.new(0.95, 0, -0.01022, 40);
+				Label["22"]["Position"] = UDim2.new(-0, 0, 0.09292, 0);
+				Label["22"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+				Label["22"]["Name"] = [[Label]];
+
+
+				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Label.UICorner
+				Label["23"] = Instance.new("UICorner", Label["22"]);
+				Label["23"]["CornerRadius"] = UDim.new(0, 9);
+
+
+				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Label.LabelText
+				Label["24"] = Instance.new("TextLabel", Label["22"]);
+				Label["24"]["TextWrapped"] = true;
+				Label["24"]["BorderSizePixel"] = 0;
+				Label["24"]["TextSize"] = 14;
+				Label["24"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+				Label["24"]["TextScaled"] = true;
+				Label["24"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+				Label["24"]["FontFace"] = Font.new([[rbxasset://fonts/families/FredokaOne.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
+				Label["24"]["TextColor3"] = Color3.fromRGB(255, 255, 255);
+				Label["24"]["BackgroundTransparency"] = 1;
+				Label["24"]["Size"] = UDim2.new(0.93527, 0, -0.18055, 29);
+				Label["24"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+				Label["24"]["Name"] = [[LabelText]];
+				Label["24"]["Text"] = options.Text;
+				Label["24"]["Position"] = UDim2.new(0.03175, 0, 0.15945, 0);
+
+
+				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Label.UIStroke
+				Label["25"] = Instance.new("UIStroke", Label["22"]);
+				Label["25"]["Thickness"] = 2.4;
+				Label["25"]["Color"] = Color3.fromRGB(54, 54, 54);
+			end
+			
+			-- Methods
+			do
+				
+			end
+			
+			--/ logics
+			do
+				Label["22"].MouseEnter:Connect(function()
+					Label.Hover = true
+					Library:tween(Label["22"], {BackgroundColor3 = Color3.fromRGB(57,57,57)})
+					Library:tween(Label["25"], {Color = Color3.fromRGB(100, 100, 100)})
+				end)
+
+				Label["22"].MouseLeave:Connect(function()
+					Label.Hover = false
+					if not Label.MouseDown then
+						Library:tween(Label["22"], {BackgroundColor3 = Color3.fromRGB(0, 8, 23)})
+						Library:tween(Label["25"], {Color = Color3.fromRGB(54, 54, 54)})
+
+					end
+				end)
+			end
+			
+			return Label
+		end
+		
+		
+		
 		
 		
 		function Tab:Slider(options)
@@ -940,4 +1019,51 @@ function Library:Init(options)
 	
 	return GUI
 end
-return Library
+
+local main = Library:Init({
+	name = "Dxv Script!",
+	keybind = Enum.KeyCode.M,
+	visible = true,
+	-- color = Color3.fromRGB(147, 147, 147)
+})
+
+local tab = main:CreateTab({
+	title = "Home",
+	--icon = ""
+})
+
+local Button = tab:Button({
+	title = "Button",
+	callback = function()
+		print("You Pressed the button!")
+	end
+})
+
+local Toggle = tab:Toggle({
+	title = "Toggle",
+	callback = function(enabled)
+		print("Toggle is now", enabled)
+	end
+})
+
+
+
+local Slider = tab:Slider({
+	title = "Slider",
+	min = 0,
+	max = 100,
+	default = 50,
+	callback = function(value)
+		print("Slider is now", value)
+	end
+})
+
+
+local TextBox = tab:TextBox({
+	title = "Textbox_TEst",
+	placeholder = "Text"
+})
+
+local Label = tab:Label({
+	Text = plr.Name
+})
