@@ -49,7 +49,9 @@ end
 
 function Library:Init(options)
 	options = Library:validate({
+		
 		title = "UI Library!",
+		keybind = Enum.KeyCode.RightControl,
 		visible = false,
 		color = Color3.fromRGB(50, 50, 50)
 	}, options or {})
@@ -57,6 +59,10 @@ function Library:Init(options)
 	local GUI = {
 		CurrentTab = nil
 	}
+	
+	if not options["visible"] then
+		options["keybind"] = nil
+	end
 	
 	
 	--Main Frame
@@ -202,10 +208,26 @@ function Library:Init(options)
 		end)
 	end
 	
+	local key = options.keybind or Enum.KeyCode.RightControl
+	local gui = GUI["2"] -- your ScreenGui
+	
 	
 	gui.Active = true
 	gui.Selectable = true
 	gui.Draggable = true
+
+	uis.InputBegan:Connect(function(input, gpe)
+		if gpe then return end -- ignore typing in chat
+
+		if input.KeyCode == key then
+			gui.Visible = not gui.Visible
+			Library:SendNotification("The UI has been closed/open.", "Please press on " .. key.Name .. " to open/close it again!")
+		end
+	end)
+	GUI["a"]["MouseButton1Click"]:Connect(function()
+		gui.Visible = not gui.Visible
+		Library:SendNotification("The UI has been closed", "You must press on " .. key.Name .. " to open it again!")
+	end)
 	
 	
 	-- navigation
@@ -247,6 +269,20 @@ function Library:Init(options)
 		GUI["13"] = Instance.new("UIListLayout", GUI["12"]);
 		GUI["13"]["Padding"] = UDim.new(0, 4);
 		GUI["13"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
+	end
+	
+	function GUI:Destroy()
+		GUI["1"]:Destroy()
+	end
+	
+	function GUI:Visible(options)
+		options = Library:validate({
+			wait_time = 10,
+		}, options or {})
+		GUI["1"].Enabled = true -- enable the ScreenGui
+		wait(options["wait_time"])
+		GUI["2"].Visible = true
+		
 	end
 	
 	function GUI:CreateTab(options)
@@ -725,176 +761,55 @@ function Library:Init(options)
 				min = 0,
 				max = 100,
 				default = 50,
-				callback = function(v) print(v) end
+				callback = function(val) end
 			}, options or {})
 
-			local Slider = {
-				MouseDown = false,
-				Hover = false,
-				Connection = nil,
-				Options = options
-			}
-			
-			--render
-			do
-				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Slider
-				Slider["26"] = Instance.new("Frame", Tab["1a"]);
-				Slider["26"]["BorderSizePixel"] = 0;
-				Slider["26"]["BackgroundColor3"] = Color3.fromRGB(0, 8, 23);
-				Slider["26"]["Size"] = UDim2.new(0.95, 0, 0.02909, 40);
-				Slider["26"]["Position"] = UDim2.new(-0, 0, 0.57455, 0);
-				Slider["26"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-				Slider["26"]["Name"] = [[Slider]];
+			local Slider = {}
 
+			-- Frame
+			Slider["frame"] = Instance.new("Frame", Tab["1a"])
+			Slider["frame"].Size = UDim2.new(0.95, 0, 0, 40)
+			Slider["frame"].BackgroundColor3 = Color3.fromRGB(39,39,39)
 
-				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Slider.UICorner
-				Slider["27"] = Instance.new("UICorner", Slider["26"]);
-				Slider["27"]["CornerRadius"] = UDim.new(0, 9);
+			-- Label
+			Slider["label"] = Instance.new("TextLabel", Slider["frame"])
+			Slider["label"].Text = options.title
+			Slider["label"].TextColor3 = Color3.fromRGB(255,255,255)
+			Slider["label"].Size = UDim2.new(0.5,0,1,0)
 
+			-- Bar
+			Slider["bar"] = Instance.new("Frame", Slider["frame"])
+			Slider["bar"].Size = UDim2.new(0.4,0,0.3,0)
+			Slider["bar"].Position = UDim2.new(0.55,0,0.35,0)
+			Slider["bar"].BackgroundColor3 = Color3.fromRGB(100,100,100)
 
-				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Slider.Title
-				Slider["28"] = Instance.new("TextLabel", Slider["26"]);
-				Slider["28"]["TextWrapped"] = true;
-				Slider["28"]["BorderSizePixel"] = 0;
-				Slider["28"]["TextSize"] = 14;
-				Slider["28"]["TextXAlignment"] = Enum.TextXAlignment.Left;
-				Slider["28"]["TextScaled"] = true;
-				Slider["28"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-				Slider["28"]["FontFace"] = Font.new([[rbxasset://fonts/families/FredokaOne.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-				Slider["28"]["TextColor3"] = Color3.fromRGB(255, 255, 255);
-				Slider["28"]["BackgroundTransparency"] = 1;
-				Slider["28"]["Size"] = UDim2.new(0.17527, 0, -0.25321, 29);
-				Slider["28"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-				Slider["28"]["Text"] =options.title;
-				Slider["28"]["Name"] = [[Title]];
-				Slider["28"]["Position"] = UDim2.new(0.03175, 0, 0.15945, 0);
+			local dragging = false
 
-
-				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Slider.UIStroke
-				Slider["29"] = Instance.new("UIStroke", Slider["26"]);
-				Slider["29"]["Thickness"] = 2.4;
-				Slider["29"]["Color"] = Color3.fromRGB(54, 54, 54);
-
-
-				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Slider.Title
-				Slider["2a"] = Instance.new("TextLabel", Slider["26"]);
-				Slider["2a"]["TextWrapped"] = true;
-				Slider["2a"]["BorderSizePixel"] = 0;
-				Slider["2a"]["TextSize"] = 14;
-				Slider["2a"]["TextScaled"] = true;
-				Slider["2a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-				Slider["2a"]["FontFace"] = Font.new([[rbxasset://fonts/families/FredokaOne.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-				Slider["2a"]["TextColor3"] = Color3.fromRGB(255, 255, 255);
-				Slider["2a"]["BackgroundTransparency"] = 1;
-				Slider["2a"]["Size"] = UDim2.new(0.17527, 0, -0.25321, 29);
-				Slider["2a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-				Slider["2a"]["Text"] = tostring(options.default);
-				Slider["2a"]["Name"] = [[Title]];
-				Slider["2a"]["Position"] = UDim2.new(0.79756, 0, 0.15945, 0);
-
-
-				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Slider.SlideBack
-				Slider["2b"] = Instance.new("Frame", Slider["26"]);
-				Slider["2b"]["BorderSizePixel"] = 0;
-				Slider["2b"]["BackgroundColor3"] = Color3.fromRGB(76, 76, 76);
-				Slider["2b"]["Size"] = UDim2.new(0, 313, 0, 10);
-				Slider["2b"]["Position"] = UDim2.new(0.02885, 0, 0.6412, 0);
-				Slider["2b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-				Slider["2b"]["Name"] = [[SlideBack]];
-
-
-				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Slider.SlideBack.UICorner
-				Slider["2c"] = Instance.new("UICorner", Slider["2b"]);
-				Slider["2c"]["CornerRadius"] = UDim.new(1, 0);
-
-
-				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Slider.SlideBack.Draggable
-				Slider["2d"] = Instance.new("Frame", Slider["2b"]);
-				Slider["2d"]["BorderSizePixel"] = 0;
-				Slider["2d"]["BackgroundColor3"] = Color3.fromRGB(135, 135, 135);
-				Slider["2d"]["Size"] = UDim2.new(0, 160, 0, 10);
-				Slider["2d"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-				Slider["2d"]["Name"] = [[Draggable]];
-
-
-				-- StarterGui.MyLibrary.Main.Navigation.HomeTab.Slider.SlideBack.Draggable.UICorner
-				Slider["2e"] = Instance.new("UICorner", Slider["2d"]);
-				Slider["2e"]["CornerRadius"] = UDim.new(1, 0);
-			end
-			
-			-- Methods
-			function Slider:SetValue(v)
-				if v == nil then
-					local percentage = math.clamp((mouse.X - Slider["2b"].AbsolutePosition.X) / (Slider["2b"].AbsoluteSize.X), 0, 1)
-					local value = math.floor(((options.max - options.min) * percentage) + options.min)
-
-					Slider["2a"]["Text"] = tostring(value)
-					Slider["2d"]["Size"] = UDim2.fromScale(percentage, 1)
-				else
-					Slider["2a"]["Text"] = tostring(v)
-					Slider["2d"]["Size"] = UDim2.fromScale(((v -  options.min) / (options.max - options.min)), 1)
+			Slider["bar"].InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then
+					dragging = true
 				end
-				options.callback(Slider:GetValue())
-			end
-			
-			function Slider:GetValue()
-				return tonumber(Slider["2a"]["Text"])
-			end
-			
-			-- logic
-			do
-				
-				Slider["26"].MouseEnter:Connect(function()
-					Slider.Hover = true
-					Library:tween(Slider["29"], {Color = Color3.fromRGB(100, 100, 100)})
-					Library:tween(Slider["2d"], {BackgroundColor3 = Color3.fromRGB(100, 100, 100)})
+			end)
 
-				end)
+			Slider["bar"].InputEnded:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then
+					dragging = false
+				end
+			end)
 
-				Slider["26"].MouseLeave:Connect(function()
-					Slider.Hover = false
-					if not Slider.MouseDown then
-						Library:tween(Slider["29"], {Color = Color3.fromRGB(81, 81, 81)})
-						Library:tween(Slider["26"], {BackgroundColor3 = Color3.fromRGB(39, 39, 39)})
-						Library:tween(Slider["2d"], {BackgroundColor3 = Color3.fromRGB(81, 81, 81)})
+			RunService.RenderStepped:Connect(function()
+				if dragging then
+					local mousePos = uis:GetMouseLocation().X
+					local framePos = Slider["frame"].AbsolutePosition.X
+					local frameSize = Slider["frame"].AbsoluteSize.X
+					local value = math.clamp((mousePos - framePos) / frameSize, 0, 1)
+					Slider["bar"].Size = UDim2.new(value,0,0.3,0)
+					local realVal = options.min + (options.max - options.min) * value
+					options.callback(realVal)
+				end
+			end)
 
-					end
-				end)
-
-				Slider["2b"].InputBegan:Connect(function(input)
-					if input.UserInputType == Enum.UserInputType.MouseButton1 then
-						Slider.MouseDown = true
-
-						Library:tween(Slider["26"], {BackgroundColor3 = Color3.fromRGB(200, 200, 200)})
-						Library:tween(Slider["29"], {Color = Color3.fromRGB(200, 200, 200)})
-
-						if not Slider.Connection then
-							Slider.Connection = RunService.RenderStepped:Connect(function()
-								Slider:SetValue()
-							end)
-						end
-					end
-				end)
-
-				uis.InputEnded:Connect(function(input)
-					if input.UserInputType == Enum.UserInputType.MouseButton1 then
-						if Slider.MouseDown then
-							Slider.MouseDown = false
-
-							Library:tween(Slider["26"], {BackgroundColor3 = Color3.fromRGB(39, 39, 39)})
-							Library:tween(Slider["29"], {Color = Color3.fromRGB(81, 81, 81)})
-						end
-
-						if Slider.Connection then
-							Slider.Connection:Disconnect()
-							Slider.Connection = nil
-						end
-					end
-				end)
-			end
-			
 			return Slider
-			
 		end
 		
 		function Tab:TextBox(options)
