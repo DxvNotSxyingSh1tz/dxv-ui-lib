@@ -785,3 +785,5 @@ function Library:Init(options)
 	end
 	return GUI
 end
+
+return Library
