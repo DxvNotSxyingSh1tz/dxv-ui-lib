@@ -49,9 +49,7 @@ end
 
 function Library:Init(options)
 	options = Library:validate({
-		
 		title = "UI Library!",
-		keybind = Enum.KeyCode.RightControl,
 		visible = false,
 		color = Color3.fromRGB(50, 50, 50)
 	}, options or {})
@@ -59,10 +57,6 @@ function Library:Init(options)
 	local GUI = {
 		CurrentTab = nil
 	}
-	
-	if not options["visible"] then
-		options["keybind"] = nil
-	end
 	
 	
 	--Main Frame
@@ -208,26 +202,10 @@ function Library:Init(options)
 		end)
 	end
 	
-	local key = options.keybind or Enum.KeyCode.RightControl
-	local gui = GUI["2"] -- your ScreenGui
-	
 	
 	gui.Active = true
 	gui.Selectable = true
 	gui.Draggable = true
-
-	uis.InputBegan:Connect(function(input, gpe)
-		if gpe then return end -- ignore typing in chat
-
-		if input.KeyCode == key then
-			gui.Visible = not gui.Visible
-			Library:SendNotification("The UI has been closed/open.", "Please press on " .. key.Name .. " to open/close it again!")
-		end
-	end)
-	GUI["a"]["MouseButton1Click"]:Connect(function()
-		gui.Visible = not gui.Visible
-		Library:SendNotification("The UI has been closed", "You must press on " .. key.Name .. " to open it again!")
-	end)
 	
 	
 	-- navigation
@@ -269,20 +247,6 @@ function Library:Init(options)
 		GUI["13"] = Instance.new("UIListLayout", GUI["12"]);
 		GUI["13"]["Padding"] = UDim.new(0, 4);
 		GUI["13"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
-	end
-	
-	function GUI:Destroy()
-		GUI["1"]:Destroy()
-	end
-	
-	function GUI:Visible(options)
-		options = Library:validate({
-			wait_time = 10,
-		}, options or {})
-		GUI["1"].Enabled = true -- enable the ScreenGui
-		wait(options["wait_time"])
-		GUI["2"].Visible = true
-		
 	end
 	
 	function GUI:CreateTab(options)
